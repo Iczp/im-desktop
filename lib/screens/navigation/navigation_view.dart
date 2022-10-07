@@ -99,6 +99,46 @@ class _NavigationViewPageState extends State<NavigationViewPage>
       subtitle(content: Text(title)),
       description(content: Text(desc)),
       CardHighlight(
+        codeSnippet: '''NavigationView(
+  appBar: const NavigationAppBar(
+    title: Text('NavigationView'),
+  ),
+  pane: NavigationPane(
+    selected: topIndex,
+    onChanged: (index) => setState(() => topIndex = index),
+    displayMode: displayMode,
+    items: [
+      PaneItem(
+        icon: const Icon(FluentIcons.home),
+        title: const Text('Home'),
+        body: BodyItem(),
+      ),
+      PaneItem(
+        icon: const Icon(FluentIcons.issue_tracking),
+        title: const Text('Track an order'),
+        infoBadge: const InfoBadge(source: Text('8')),
+        body: BodyItem(),
+      ),
+      PaneItemExpander(
+        icon: const Icon(FluentIcons.account_management),
+        title: const Text('Account'),
+        body: BodyItem(),
+        items: [
+          PaneItem(
+            icon: const Icon(FluentIcons.mail),
+            title: const Text('Mail'),
+            body: BodyItem(),
+          ),
+          PaneItem(
+            icon: const Icon(FluentIcons.calendar),
+            title: const Text('Calendar'),
+            body: BodyItem(),
+          ),
+        ],
+      ),
+    ],
+  ),
+)''',
         child: SizedBox(
           height: itemHeight,
           child: NavigationView(
@@ -174,18 +214,18 @@ class _NavigationViewPageState extends State<NavigationViewPage>
                     switch (pageTransition) {
                       case 'entrance':
                         return EntrancePageTransition(
-                          child: child,
                           animation: animation,
+                          child: child,
                         );
                       case 'drill in':
                         return DrillInPageTransition(
-                          child: child,
                           animation: animation,
+                          child: child,
                         );
                       case 'horizontal':
                         return HorizontalSlidePageTransition(
-                          child: child,
                           animation: animation,
+                          child: child,
                         );
                       default:
                         throw UnsupportedError(
@@ -195,46 +235,6 @@ class _NavigationViewPageState extends State<NavigationViewPage>
                   },
           ),
         ),
-        codeSnippet: '''NavigationView(
-  appBar: const NavigationAppBar(
-    title: Text('NavigationView'),
-  ),
-  pane: NavigationPane(
-    selected: topIndex,
-    onChanged: (index) => setState(() => topIndex = index),
-    displayMode: displayMode,
-    items: [
-      PaneItem(
-        icon: const Icon(FluentIcons.home),
-        title: const Text('Home'),
-        body: BodyItem(),
-      ),
-      PaneItem(
-        icon: const Icon(FluentIcons.issue_tracking),
-        title: const Text('Track an order'),
-        infoBadge: const InfoBadge(source: Text('8')),
-        body: BodyItem(),
-      ),
-      PaneItemExpander(
-        icon: const Icon(FluentIcons.account_management),
-        title: const Text('Account'),
-        body: BodyItem(),
-        items: [
-          PaneItem(
-            icon: const Icon(FluentIcons.mail),
-            title: const Text('Mail'),
-            body: BodyItem(),
-          ),
-          PaneItem(
-            icon: const Icon(FluentIcons.calendar),
-            title: const Text('Calendar'),
-            body: BodyItem(),
-          ),
-        ],
-      ),
-    ],
-  ),
-)''',
       ),
     ];
   }

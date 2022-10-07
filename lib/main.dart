@@ -1,6 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart' hide Page;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
+import 'package:im_desktop/sides/side_bar.dart';
+
 import 'package:provider/provider.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:url_launcher/link.dart';
@@ -8,6 +10,7 @@ import 'package:url_strategy/url_strategy.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'screens/home.dart';
+import 'screens/messages/chating.dart';
 import 'screens/settings.dart';
 
 import 'routes/forms.dart' deferred as forms;
@@ -19,7 +22,7 @@ import 'routes/theming.dart' deferred as theming;
 import 'theme.dart';
 import 'widgets/deferred_widget.dart';
 
-const String appTitle = 'Fluent UI Showcase for Flutter';
+const String appTitle = '数字日春 v0.0.1';
 
 /// Checks if the current environment is a desktop environment.
 bool get isDesktop {
@@ -54,7 +57,7 @@ void main() async {
         windowButtonVisibility: false,
       );
       await windowManager.setSize(const Size(755, 545));
-      await windowManager.setMinimumSize(const Size(350, 600));
+      await windowManager.setMinimumSize(const Size(600, 350));
       await windowManager.center();
       await windowManager.show();
       await windowManager.setPreventClose(true);
@@ -143,6 +146,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
   void resetSearch() => searchController.clear();
   String get searchValue => searchController.text;
   final List<NavigationPaneItem> originalItems = [
+    PaneItem(
+      icon: const Icon(FluentIcons.chat),
+      title: const Text('消息'),
+      body: const ChatingPage(),
+    ),
     PaneItem(
       icon: const Icon(FluentIcons.home),
       title: const Text('Home'),
@@ -402,117 +410,131 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
     super.dispose();
   }
 
+  // @override
+  Widget build0(BuildContext context) {
+    return SideBar(
+      key: viewKey,
+      child: Text('data'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
     final theme = FluentTheme.of(context);
-    return NavigationView(
+    return SideBar(
       key: viewKey,
-      appBar: NavigationAppBar(
-        automaticallyImplyLeading: false,
-        title: () {
-          if (kIsWeb) {
-            return const Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(appTitle),
-            );
-          }
-          return const DragToMoveArea(
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(appTitle),
-            ),
-          );
-        }(),
-        actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 8.0),
-            child: ToggleSwitch(
-              content: const Text('Dark Mode'),
-              checked: FluentTheme.of(context).brightness.isDark,
-              onChanged: (v) {
-                if (v) {
-                  appTheme.mode = ThemeMode.dark;
-                } else {
-                  appTheme.mode = ThemeMode.light;
-                }
-              },
-            ),
-          ),
-          if (!kIsWeb) const WindowButtons(),
-        ]),
-      ),
-      pane: NavigationPane(
-        selected: () {
-          // if not searching, return the current index
-          if (searchValue.isEmpty) return index;
-
-          final indexOnScreen = items.indexOf(
-            [...originalItems, ...footerItems]
-                .whereType<PaneItem>()
-                .elementAt(index),
-          );
-          if (indexOnScreen.isNegative) return null;
-          return indexOnScreen;
-        }(),
-        onChanged: (i) {
-          // If searching, the values will have different indexes
-          if (searchValue.isNotEmpty) {
-            final equivalentIndex = [...originalItems, ...footerItems]
-                .whereType<PaneItem>()
-                .toList()
-                .indexOf(items[i] as PaneItem);
-            i = equivalentIndex;
-          }
-          resetSearch();
-          setState(() => index = i);
-        },
-        header: SizedBox(
-          height: kOneLineTileHeight,
-          child: ShaderMask(
-            shaderCallback: (rect) {
-              final color = appTheme.color.resolveFromReverseBrightness(
-                theme.brightness,
-                level: theme.brightness == Brightness.light ? 0 : 2,
+      child: NavigationView(
+        // key: viewKey,
+        appBar: NavigationAppBar(
+          automaticallyImplyLeading: false,
+          title: () {
+            if (kIsWeb) {
+              return const Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(appTitle),
               );
-              return LinearGradient(
-                colors: [
-                  color,
-                  color,
-                ],
-              ).createShader(rect);
-            },
-            child: const FlutterLogo(
-              style: FlutterLogoStyle.horizontal,
-              size: 80.0,
-              textColor: Colors.white,
-              duration: Duration.zero,
-            ),
+            }
+            return const DragToMoveArea(
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(appTitle),
+              ),
+            );
+          }(),
+          actions: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 8.0),
+                child: ToggleSwitch(
+                  content: const Text('Dark Mode'),
+                  checked: FluentTheme.of(context).brightness.isDark,
+                  onChanged: (v) {
+                    if (v) {
+                      appTheme.mode = ThemeMode.dark;
+                    } else {
+                      appTheme.mode = ThemeMode.light;
+                    }
+                  },
+                ),
+              ),
+              if (!kIsWeb) const WindowButtons(),
+            ],
           ),
         ),
-        displayMode: appTheme.displayMode,
-        indicator: () {
-          switch (appTheme.indicator) {
-            case NavigationIndicators.end:
-              return const EndNavigationIndicator();
-            case NavigationIndicators.sticky:
-            default:
-              return const StickyNavigationIndicator();
-          }
-        }(),
-        items: items,
-        autoSuggestBox: TextBox(
-          key: key,
-          controller: searchController,
-          placeholder: 'Search',
-          focusNode: searchFocusNode,
+        pane: NavigationPane(
+          selected: () {
+            // if not searching, return the current index
+            if (searchValue.isEmpty) return index;
+
+            final indexOnScreen = items.indexOf(
+              [...originalItems, ...footerItems]
+                  .whereType<PaneItem>()
+                  .elementAt(index),
+            );
+            if (indexOnScreen.isNegative) return null;
+            return indexOnScreen;
+          }(),
+          onChanged: (i) {
+            // If searching, the values will have different indexes
+            if (searchValue.isNotEmpty) {
+              final equivalentIndex = [...originalItems, ...footerItems]
+                  .whereType<PaneItem>()
+                  .toList()
+                  .indexOf(items[i] as PaneItem);
+              i = equivalentIndex;
+            }
+            resetSearch();
+            setState(() => index = i);
+          },
+          header: SizedBox(
+            height: kOneLineTileHeight,
+            child: ShaderMask(
+              shaderCallback: (rect) {
+                final color = appTheme.color.resolveFromReverseBrightness(
+                  theme.brightness,
+                  level: theme.brightness == Brightness.light ? 0 : 2,
+                );
+                return LinearGradient(
+                  colors: [
+                    color,
+                    color,
+                  ],
+                ).createShader(rect);
+              },
+              child: const FlutterLogo(
+                style: FlutterLogoStyle.horizontal,
+                size: 80.0,
+                textColor: Colors.white,
+                duration: Duration.zero,
+              ),
+            ),
+          ),
+          displayMode: appTheme.displayMode,
+          indicator: () {
+            switch (appTheme.indicator) {
+              case NavigationIndicators.end:
+                return const EndNavigationIndicator();
+              case NavigationIndicators.sticky:
+              default:
+                return const StickyNavigationIndicator();
+            }
+          }(),
+          items: items,
+          autoSuggestBox: TextBox(
+            key: key,
+            controller: searchController,
+            placeholder: 'Search',
+            focusNode: searchFocusNode,
+          ),
+          autoSuggestBoxReplacement: const Icon(FluentIcons.search),
+          footerItems: searchValue.isNotEmpty ? [] : footerItems,
         ),
-        autoSuggestBoxReplacement: const Icon(FluentIcons.search),
-        footerItems: searchValue.isNotEmpty ? [] : footerItems,
+        onOpenSearch: () {
+          searchFocusNode.requestFocus();
+        },
       ),
-      onOpenSearch: () {
-        searchFocusNode.requestFocus();
-      },
     );
   }
 

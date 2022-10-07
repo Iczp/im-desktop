@@ -3,23 +3,70 @@ import 'package:fluent_ui/fluent_ui.dart';
 import '../../widgets/card_highlight.dart';
 import '../../widgets/page.dart';
 
-class SliderPage extends StatefulWidget {
-  const SliderPage({Key? key}) : super(key: key);
+class ChatingPage extends StatefulWidget {
+  const ChatingPage({Key? key}) : super(key: key);
 
   @override
-  State<SliderPage> createState() => _SliderPageState();
+  State<ChatingPage> createState() => _ChatingPageState();
 }
 
-class _SliderPageState extends State<SliderPage> with PageMixin {
+class _ChatingPageState extends State<ChatingPage> with PageMixin {
   bool disabled = false;
   double firstValue = 23.0;
   double verticalValue = 50.0;
 
+  int topIndex = 0;
+
+  PaneDisplayMode displayMode = PaneDisplayMode.auto;
+
   @override
   Widget build(BuildContext context) {
+    return NavigationView(
+      // appBar: const NavigationAppBar(
+      //   title: Text('NavigationView'),
+      // ),
+      pane: NavigationPane(
+        selected: topIndex,
+        onChanged: (index) => setState(() => topIndex = index),
+        displayMode: displayMode,
+        items: [
+          PaneItem(
+            icon: const Icon(FluentIcons.home),
+            title: const Text('Home'),
+            body: BodyItem(),
+          ),
+          PaneItem(
+            icon: const Icon(FluentIcons.issue_tracking),
+            title: const Text('Track an order'),
+            infoBadge: const InfoBadge(source: Text('8')),
+            body: BodyItem(),
+          ),
+          PaneItemExpander(
+            icon: const Icon(FluentIcons.account_management),
+            title: const Text('Account'),
+            body: BodyItem(),
+            items: [
+              PaneItem(
+                icon: const Icon(FluentIcons.mail),
+                title: const Text('Mail'),
+                body: BodyItem(),
+              ),
+              PaneItem(
+                icon: const Icon(FluentIcons.calendar),
+                title: const Text('Calendar'),
+                body: BodyItem(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget build1(BuildContext context) {
     return ScaffoldPage.scrollable(
       header: PageHeader(
-        title: const Text('Slider'),
+        title: const Text('消息'),
         commandBar: ToggleSwitch(
           checked: disabled,
           onChanged: (v) => setState(() => disabled = v),
@@ -96,6 +143,25 @@ Slider(
           ),
         ),
       ],
+    );
+  }
+}
+
+class BodyItem extends StatelessWidget {
+  const BodyItem({
+    Key? key,
+    this.header,
+    this.content,
+  }) : super(key: key);
+
+  final String? header;
+  final Widget? content;
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaffoldPage.withPadding(
+      header: PageHeader(title: Text(header ?? 'This is a header text')),
+      content: content ?? const SizedBox.shrink(),
     );
   }
 }
